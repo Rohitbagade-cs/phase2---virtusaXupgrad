@@ -3,12 +3,10 @@
 A complete Banking System built using Spring Boot Microservices, featuring:
 
 - Eureka Server (Service Discovery)
-- API Gateway (Routing + Load Balancing)
+- API Gateway (Routing)
 - Account Service (MongoDB)
 - Transaction Service (MongoDB + Feign + Resilience4j)
 - Notification Service (MongoDB)
-- Docker Compose (Run all services together)
-- Unit Tests (Assignment Requirement)
 
 ---
 
