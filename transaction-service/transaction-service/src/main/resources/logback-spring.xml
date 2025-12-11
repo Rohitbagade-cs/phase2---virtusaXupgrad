@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+    <springProperty scope="context" name="LOGSTASH_HOST" source="LOGSTASH_HOST" defaultValue="logstash"/>
+    <springProperty scope="context" name="LOGSTASH_PORT" source="LOGSTASH_PORT" defaultValue="5000"/>
+    <springProperty scope="context" name="SERVICE_NAME" source="spring.application.name" defaultValue="unknown-service"/>
+
+    <!-- Pattern to include MDC correlationId and stacktrace -->
+    <appender name="ConsoleJson" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>${LOGSTASH_HOST}:${LOGSTASH_PORT}</destination>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                </timestamp>
+                <pattern>
+                    <pattern>
+                        {
+                        "service":"${SERVICE_NAME}",
+                        "thread":"%thread",
+                        "level":"%level",
+                        "logger":"%logger{36}",
+                        "message":"%message",
+                        "correlationId":"%X{correlationId}"
+                        }
+                    </pattern>
+                </pattern>
+                <stackTrace>
+                    <fieldName>stack_trace</fieldName>
+                </stackTrace>
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- File appender (rotating), also JSON encoded -->
+    <appender name="RollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/${SERVICE_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/${SERVICE_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>14</maxHistory>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp />
+                <loggerName />
+                <pattern>
+                    <pattern>{"service":"${SERVICE_NAME}","thread":"%thread","level":"%level","logger":"%logger{36}","message":"%message","correlationId":"%X{correlationId}"}</pattern>
+                </pattern>
+                <stackTrace />
+            </providers>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ConsoleJson" />
+        <appender-ref ref="RollingFile" />
+    </root>
+
+    <!-- optional: fine tune package logging -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.mongodb" level="WARN"/>
+</configuration>

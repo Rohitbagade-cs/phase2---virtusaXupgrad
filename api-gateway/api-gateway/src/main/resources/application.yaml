@@ -1,0 +1,50 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+          default-filters:
+            - AddRequestHeader=X-Request-Start, "#{T(java.time.Instant).now().toString()}"
+          routes:
+            - id: account_route
+              uri: lb://account-service
+              predicates:
+                - Path=/api/accounts/**
+
+            - id: transaction_route
+              uri: lb://transaction-service
+              predicates:
+                - Path=/api/transactions/**
+
+            - id: notification_route
+              uri: lb://notification-service
+              predicates:
+                - Path=/api/notifications/**
+
+            # optional route to actuator of services if needed
+            - id: account_actuator
+              uri: lb://account-service
+              predicates:
+                - Path=/actuator/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env,metrics,loggers
+
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.example.gateway: DEBUG

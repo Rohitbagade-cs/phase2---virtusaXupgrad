@@ -1,0 +1,29 @@
+server:
+  port: 8761
+spring:
+  application:
+    name: eureka-server
+
+# Eureka server settings
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    register-with-eureka: false   # this app IS the registry, it shouldn't register itself
+    fetch-registry: false
+
+# management endpoints (for health/actuator)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env
+  endpoint:
+    health:
+      show-details: always
+
+# Logging (optional basic)
+logging:
+  level:
+    root: INFO
+    com.example: DEBUG
